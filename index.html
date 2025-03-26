@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiscoverAI - Interactive Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            position: relative;
+            color: #FFFFFF;
+        }
+
+        /* Sidebar */
+        .sidebar-hover-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .sidebar-hover-area.permanent {
+            width: 0;
+        }
+
+        .sidebar {
+            background: rgba(217, 217, 217, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            width: 250px;
+            height: 100%;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transition: transform 0.3s ease;
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 2;
+            transform: translateX(-100%);
+        }
+
+        .sidebar-hover-area:hover .sidebar {
+            transform: translateX(0);
+        }
+
+        .sidebar.permanent {
+            transform: translateX(0);
+        }
+
+        .toggle-btn {
+            background: #0C10FF;
+            color: #FFFFFF;
+            border: none;
+            padding: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            padding: 10px 0;
+            color: #FFFFFF;
+            cursor: pointer;
+            border-bottom: 1px solid #FFFFFF;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar ul li:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 1;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        /* Home Page Layout */
+        .home-layout {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        .module-layout {
+            width: 100%;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 80px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: #0C10FF;
+            margin-bottom: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #FFFFFF;
+            margin-bottom: 50px;
+        }
+
+        /* Module Cards - Single Row */
+        .module-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            flex-wrap: wrap;
+        }
+
+        .module-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            width: 250px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(12, 16, 255, 0.3);
+        }
+
+        .module-card h3 {
+            color: #0C10FF;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .module-card p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Learning Interface */
+        .learning-interface {
+            width: 80%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            display: none;
+        }
+
+        .module-info {
+            margin-bottom: 20px;
+        }
+
+        .module-title {
+            font-size: 24px;
+            color: #0C10FF;
+            margin-bottom: 10px;
+        }
+
+        .module-description {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .learning-progress {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #0C10FF;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .discovery-question {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .user-response {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .response-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .response-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #0C10FF;
+        }
+
+        .submit-btn {
+            background: #0C10FF;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #090db3;
+        }
+
+        .discovery-dialog {
+            margin-top: 30px;
+            text-align: left;
+            height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background: rgba(12, 16, 255, 0.3);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai-message {
+            background: rgba(255, 255, 255, 0.2);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .hint-btn {
+            background: transparent;
+            color: #0C10FF;
+            border: 1px solid #0C10FF;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .hint-btn:hover {
+            background: rgba(12, 16, 255, 0.2);
+        }
+
+        .next-step-btn {
+            background: #0C10FF;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* Stars Background */
+        .star {
+            position: absolute;
+            background: #FFFFFF;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(12, 16, 255, 0.5);
+            animation: twinkle 3s infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(0.7); }
+            100% { opacity: 1; transform: scale(1.3); }
+        }
+
+        /* Comet */
+        .comet {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #0C10FF, 0 0 40px rgba(12, 16, 255, 0.7);
+            z-index: 0;
+            opacity: 0;
+        }
+
+        .comet::after {
+            content: '';
+            position: absolute;
+            width: var(--tail-length, 50px);
+            height: 2px;
+            background: linear-gradient(to left, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8));
+            left: calc(-1 * var(--tail-length, 50px));
+            top: 50%;
+            transform: translateY(-50%);
+            filter: blur(1px);
+        }
+
+        .animate-comet {
+            animation: move-comet 3s linear forwards;
+        }
+
+        @keyframes move-comet {
+            0% { transform: translate(0, 0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(100vw, 100vh); opacity: 0; }
+        }
+
+        .home-btn {
+    background: transparent;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+    width: 100%;
+    transition: all 0.3s;
+}
+
+.home-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar-hover-area" id="sidebarHoverArea">
+        <div class="sidebar" id="sidebar">
+            <button class="toggle-btn" onclick="toggleSidebarMode()">☰</button>
+            <button class="home-btn" onclick="goToHome()">Discover.Ai</button>
+            <h2>Recent Modules</h2>
+            <ul id="recentModules">
+                <!-- Recently visited modules will appear here -->
+                <li>No recent modules yet</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Home Layout (shown by default) -->
+        <div class="home-layout" id="homeLayout">
+            <h1>DISCOVER.AI</h1>
+            <p class="subtitle">Learn through guided discovery</p>
+            
+            <div class="module-row">
+                <div class="module-card" data-module="physics">
+                    <h3>Physics</h3>
+                    <p>Discover the fundamental laws of the universe</p>
+                </div>
+                <div class="module-card" data-module="biology">
+                    <h3>Biology</h3>
+                    <p>Explore the building blocks of life</p>
+                </div>
+                <div class="module-card" data-module="history">
+                    <h3>History</h3>
+                    <p>Uncover the stories of our past</p>
+                </div>
+                <div class="module-card" data-module="programming">
+                    <h3>Programming</h3>
+                    <p>Learn to code through exploration</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Interface (hidden by default) -->
+        <div class="learning-interface" id="learningInterface">
+            <div class="module-info">
+                <h3 class="module-title" id="moduleTitle">Module Title</h3>
+                <p class="module-description" id="moduleDescription">Module description goes here</p>
+            </div>
+
+            <div class="learning-progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="discovery-question" id="discoveryQuestion">
+                Discovery question will appear here
+            </div>
+
+            <div class="discovery-dialog" id="discoveryDialog">
+                <!-- Dialog messages will appear here -->
+            </div>
+
+            <div class="user-response">
+                <textarea class="response-input" id="userResponse" placeholder="What are your thoughts?"></textarea>
+                <div>
+                    <button class="submit-btn" id="submitResponse">Submit</button>
+                    <button class="hint-btn" id="hintBtn">Need a hint?</button>
+                </div>
+            </div>
+
+            <button class="next-step-btn" id="nextStepBtn">Continue to Next Step</button>
+        </div>
+    </div>
+
+    <!-- Stars Background -->
+    <div id="stars-container"></div>
+
+    <!-- Comet -->
+    <div class="comet" id="comet"></div>
+
+    <script>
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const sidebarHoverArea = document.getElementById('sidebarHoverArea');
+        const mainContent = document.getElementById('mainContent');
+        const homeLayout = document.getElementById('homeLayout');
+        const learningInterface = document.getElementById('learningInterface');
+        const moduleTitle = document.getElementById('moduleTitle');
+        const moduleDescription = document.getElementById('moduleDescription');
+        const progressBar = document.getElementById('progressBar');
+        const discoveryQuestion = document.getElementById('discoveryQuestion');
+        const userResponse = document.getElementById('userResponse');
+        const submitResponse = document.getElementById('submitResponse');
+        const hintBtn = document.getElementById('hintBtn');
+        const discoveryDialog = document.getElementById('discoveryDialog');
+        const nextStepBtn = document.getElementById('nextStepBtn');
+        const moduleCards = document.querySelectorAll('.module-card');
+        const recentModulesList = document.getElementById('recentModules');
+
+        // State Management
+        let currentModule = null;
+        let currentStep = 0;
+        let conversationHistory = [];
+        let isPermanent = false;
+        let recentModules = [];
+
+        // Learning Modules Data
+        const modules = {
+            physics: {
+                title: "Introduction to Physics",
+                description: "Discover the fundamental laws that govern motion, energy, and matter in the universe.",
+                steps: [
+                    {
+                        question: "What happens when you push an object on a flat surface? Why does it eventually stop?",
+                        learningObjective: "Understand the concept of friction and Newton's First Law"
+                    },
+                    {
+                        question: "Imagine you drop a feather and a hammer from the same height. Which hits the ground first? Why?",
+                        learningObjective: "Explore gravity and air resistance"
+                    },
+                    {
+                        question: "How does the energy from the Sun reach Earth? What form does this energy take?",
+                        learningObjective: "Understand electromagnetic radiation and energy transfer"
+                    }
+                ]
+            },
+            biology: {
+                title: "Cell Biology",
+                description: "Explore the microscopic world of cells and understand how life functions at its most basic level.",
+                steps: [
+                    {
+                        question: "What do you think is inside a cell? How might these components work together?",
+                        learningObjective: "Identify basic cell structures and their functions"
+                    },
+                    {
+                        question: "How do cells obtain energy? What processes might be involved?",
+                        learningObjective: "Understand cellular respiration and energy production"
+                    },
+                    {
+                        question: "Why do cells divide? What purposes does this serve in living organisms?",
+                        learningObjective: "Explore cell division and reproduction"
+                    }
+                ]
+            },
+            history: {
+                title: "World History",
+                description: "Journey through time to understand how civilizations developed and interacted.",
+                steps: [
+                    {
+                        question: "What factors might have led early humans to transition from hunter-gatherers to farmers?",
+                        learningObjective: "Understand the Neolithic Revolution"
+                    },
+                    {
+                        question: "How did the invention of writing change human societies? What new possibilities did it create?",
+                        learningObjective: "Explore the development of early civilizations"
+                    },
+                    {
+                        question: "What were some consequences of the Columbian Exchange between the Old and New Worlds?",
+                        learningObjective: "Understand global interconnectedness"
+                    }
+                ]
+            },
+            programming: {
+                title: "Python Basics",
+                description: "Learn programming fundamentals through exploration and experimentation.",
+                steps: [
+                    {
+                        question: "What do you think a 'variable' in programming might be used for? Can you think of real-world analogies?",
+                        learningObjective: "Understand variables and data storage"
+                    },
+                    {
+                        question: "How might a computer program make decisions? What structures could enable this?",
+                        learningObjective: "Explore conditional logic"
+                    },
+                    {
+                        question: "Why would a programmer want to repeat certain actions? How might this be accomplished?",
+                        learningObjective: "Understand loops and iteration"
+                    }
+                ]
+            }
+        };
+
+        // Initialize the page
+        function init() {
+            createStars();
+            setupEventListeners();
+            triggerComet();
+            setInterval(triggerComet, 30000); // Comet every 30 seconds
+            loadRecentModules();
+        }
+
+        // Create random stars
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                star.style.opacity = Math.random() * 0.7 + 0.3;
+                
+                container.appendChild(star);
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Module selection
+            moduleCards.forEach(card => {
+                card.addEventListener('click', () => loadModule(card.dataset.module));
+            });
+
+            // Response submission
+            submitResponse.addEventListener('click', processUserResponse);
+            userResponse.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    processUserResponse();
+                }
+            });
+
+            // Hint button
+            hintBtn.addEventListener('click', provideHint);
+
+            // Next step button
+            nextStepBtn.addEventListener('click', nextStep);
+        }
+
+        // Load a learning module
+        function loadModule(moduleId) {
+            currentModule = modules[moduleId];
+            currentStep = 0;
+            conversationHistory = [];
+
+            // Update UI
+            homeLayout.style.display = 'none';
+            learningInterface.style.display = 'block';
+            
+            // Update module info
+            moduleTitle.textContent = currentModule.title;
+            moduleDescription.textContent = currentModule.description;
+            
+            // Add to recent modules
+            addRecentModule(moduleId);
+            
+            updateProgress();
+            displayCurrentQuestion();
+        }
+
+        // Add module to recent modules
+        function addRecentModule(moduleId) {
+            // Remove if already exists
+            recentModules = recentModules.filter(m => m.id !== moduleId);
+            
+            // Add to beginning
+            recentModules.unshift({
+                id: moduleId,
+                title: modules[moduleId].title
+            });
+            
+            // Keep only last 5
+            if (recentModules.length > 5) {
+                recentModules.pop();
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('recentModules', JSON.stringify(recentModules));
+            
+            // Update UI
+            updateRecentModulesList();
+        }
+
+        // Load recent modules from storage
+        function loadRecentModules() {
+            const saved = localStorage.getItem('recentModules');
+            if (saved) {
+                recentModules = JSON.parse(saved);
+                updateRecentModulesList();
+            }
+        }
+
+        // Update recent modules list in sidebar
+        function updateRecentModulesList() {
+            recentModulesList.innerHTML = '';
+            
+            if (recentModules.length === 0) {
+                recentModulesList.innerHTML = '<li>No recent modules yet</li>';
+                return;
+            }
+            
+            recentModules.forEach(module => {
+                const li = document.createElement('li');
+                li.textContent = module.title;
+                li.dataset.module = module.id;
+                li.addEventListener('click', () => loadModule(module.id));
+                recentModulesList.appendChild(li);
+            });
+        }
+
+        // Display the current question
+        function displayCurrentQuestion() {
+            if (currentStep < currentModule.steps.length) {
+                discoveryQuestion.textContent = currentModule.steps[currentStep].question;
+                userResponse.value = '';
+                discoveryDialog.innerHTML = '';
+                nextStepBtn.style.display = 'none';
+            } else {
+                // Module completed
+                discoveryQuestion.textContent = "Congratulations! You've completed this module.";
+                userResponse.style.display = 'none';
+                submitResponse.style.display = 'none';
+                hintBtn.style.display = 'none';
+                nextStepBtn.style.display = 'none';
+                
+                addDialogMessage("You've demonstrated great understanding through your exploration!", false);
+                addDialogMessage("Would you like to try another module?", false);
+            }
+        }
+
+        // Process user response
+        async function processUserResponse() {
+            const response = userResponse.value.trim();
+            if (!response) return;
+
+            addDialogMessage(response, true);
+            userResponse.value = '';
+            
+            // Show typing indicator
+            const typingIndicator = addDialogMessage("Thinking...", false);
+            
+            try {
+                // Simulate API call
+                setTimeout(() => {
+                    typingIndicator.remove();
+                    
+                    const objective = currentModule.steps[currentStep].learningObjective;
+                    const aiResponse = generateDiscoveryResponse(response, objective);
+                    addDialogMessage(aiResponse, false);
+                    
+                    conversationHistory.push({ role: 'user', content: response });
+                    conversationHistory.push({ role: 'assistant', content: aiResponse });
+                    
+                    if (conversationHistory.length >= 4) {
+                        nextStepBtn.style.display = 'block';
+                    }
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                typingIndicator.remove();
+                addDialogMessage("I'm having trouble processing that. Could you try rephrasing?", false);
+            }
+        }
+
+        // Generate a discovery-based response
+        function generateDiscoveryResponse(userInput, learningObjective) {
+            const responses = [
+                `That's an interesting perspective! Have you considered how ${learningObjective.toLowerCase()} might relate to your answer?`,
+                `Good thinking! To explore further, you might want to consider: [Counter-question related to ${learningObjective}]`,
+                `I like how you're approaching this. A related experiment you could try: [Simple experiment suggestion]`,
+                `You're on the right track! Here's a different angle to consider: [Alternative perspective]`,
+                `That's a valid observation. What would happen if we changed one variable in this scenario?`,
+                `Interesting! How might your answer change if we looked at it from this perspective: [New perspective]?`
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Provide a hint
+        function provideHint() {
+            const objective = currentModule.steps[currentStep].learningObjective;
+            const hints = [
+                `Think about the key concept of ${objective.split(' ')[0]}`,
+                `Consider what would happen if one variable was changed`,
+                `Try to relate this to real-world examples you've experienced`,
+                `What's the fundamental principle behind this phenomenon?`,
+                `Break the problem down into smaller parts to analyze it`
+            ];
+            
+            const hint = hints[Math.floor(Math.random() * hints.length)];
+            addDialogMessage(`Hint: ${hint}`, false);
+        }
+
+        // Add a message to the dialog
+        function addDialogMessage(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            messageDiv.textContent = content;
+            discoveryDialog.appendChild(messageDiv);
+            discoveryDialog.scrollTop = discoveryDialog.scrollHeight;
+            return messageDiv;
+        }
+
+        // Move to the next step
+        function nextStep() {
+            currentStep++;
+            conversationHistory = [];
+            updateProgress();
+            displayCurrentQuestion();
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const progress = (currentStep / currentModule.steps.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Toggle sidebar mode
+        function toggleSidebarMode() {
+            isPermanent = !isPermanent;
+
+            if (isPermanent) {
+                sidebar.classList.add('permanent');
+                sidebarHoverArea.classList.add('permanent');
+            } else {
+                sidebar.classList.remove('permanent');
+                sidebarHoverArea.classList.remove('permanent');
+            }
+        }
+
+        // Comet animation
+        function triggerComet() {
+            const comet = document.getElementById('comet');
+            comet.classList.remove('animate-comet');
+            
+            const startX = Math.random() * 100;
+            const startY = Math.random() * 100;
+            const endX = 100 - startX;
+            const endY = 100 - startY;
+            const size = Math.random() * 3 + 3;
+            const tailLength = Math.random() * 100 + 50;
+            
+            comet.style.width = `${size}px`;
+            comet.style.height = `${size}px`;
+            comet.style.left = `${startX}%`;
+            comet.style.top = `${startY}%`;
+            comet.style.setProperty('--tail-length', `${tailLength}px`);
+            
+            const keyframes = `
+                @keyframes move-comet {
+                    0% { transform: translate(0, 0); opacity: 0; }
+                    10% { opacity: 1; }
+                    90% { opacity: 1; }
+                    100% { transform: translate(calc(${endX - startX}vw), calc(${endY - startY}vh)); opacity: 0; }
+                }
+            `;
+            
+            const oldStyle = document.getElementById('comet-keyframes');
+            if (oldStyle) oldStyle.remove();
+            
+            const style = document.createElement('style');
+            style.id = 'comet-keyframes';
+            style.innerHTML = keyframes;
+            document.head.appendChild(style);
+            
+            void comet.offsetWidth;
+            comet.classList.add('animate-comet');
+        }
+
+        // Initialize the application
+        window.addEventListener('load', init);
+
+        function goToHome() {
+    homeLayout.style.display = 'flex';
+    learningInterface.style.display = 'none';
+    currentModule = null;
+}
+
+    </script>
+</body>
+</html>
